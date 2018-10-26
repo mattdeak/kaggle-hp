@@ -1,4 +1,5 @@
-from .directories import *
+from .config import *
+import tensorflow as tf
 
 def _decode_img(serialized_img, height=512, width=512):
     image = tf.decode_raw(serialized_img, tf.float32)
@@ -41,11 +42,11 @@ def _parse_function(example_proto):
     labels = parsed['labels']
     labels = tf.sparse_to_dense(labels.indices, labels.dense_shape, labels.values)
     
-    return parsed['id'], images, labels
+    return images, labels
 
 def _load_dataset(tfrecord_path):
     dataset = tf.data.TFRecordDataset(tfrecord_path)
-    dataset.map(_parse_function)
+    dataset = dataset.map(_parse_function)
     return dataset
 
 def load_train():
