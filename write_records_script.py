@@ -49,7 +49,7 @@ def create_record(out_filename, data):
     
     Arguments:
         out_filename {str} -- The path to the output file
-        id_info {[type]} -- [description]
+        id_info {pd.DataFrame} -- A Dataframe containing ID and label data
     """
     ids, labels = zip(*data)
 
