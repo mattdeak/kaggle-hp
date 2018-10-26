@@ -44,21 +44,21 @@ def _parse_function(example_proto):
     
     return images, labels
 
-def _load_dataset(tfrecord_path):
-    dataset = tf.data.TFRecordDataset(tfrecord_path)
+def _load_dataset(tfrecord_path, **kwargs):
+    dataset = tf.data.TFRecordDataset(tfrecord_path, **kwargs)
     dataset = dataset.map(_parse_function)
     return dataset
 
-def load_train():
+def load_train(**kwargs):
     path = f'{KAGGLE_TRAIN}/tfrecords/train.tfrecords'
-    return _load_dataset(path)
+    return _load_dataset(path, **kwargs)
 
-def load_validation():
+def load_validation(**kwargs):
     path = f'{KAGGLE_TRAIN}/tfrecords/val.tfrecords'
-    return _load_dataset(path)
+    return _load_dataset(path, **kwargs)
 
-def load_test():
+def load_test(**kwargs):
     path = f'{KAGGLE_TRAIN}/tfrecords/test.tfrecords'
-    return _load_dataset(path)
+    return _load_dataset(path, **kwargs)
 
 
