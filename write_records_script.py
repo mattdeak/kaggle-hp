@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 import os
 from tqdm import tqdm
-from config import *
+from lib.config import *
+
 
 def _bytes_feature(value):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
@@ -17,7 +18,7 @@ def _int64_feature(value):
     # Else..
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
-def load_image(image_id, directory=KAGGLE_TRAIN, channels=['green', 'blue', 'red', 'yellow']):
+def load_image(image_id, directory=RAW, channels=['green', 'blue', 'red', 'yellow']):
     """Loads image channels from an image ID
     
     Arguments:
@@ -29,7 +30,19 @@ def load_image(image_id, directory=KAGGLE_TRAIN, channels=['green', 'blue', 'red
     Returns:
         dict -- A dictionary in the form of {channel : image_info}
     """
-    images = {channel : im.imread(f'{directory}/{image_id}_{channel}.png') for channel in channels}
+    images = {}
+
+
+    for channel in channels:
+        filepath = f'{directory}/{image_id}_{channel}.png'
+        with tf.gfile.FastGFile(filepath, 'rb') as reader:
+            image_data = reader.read()
+            images[channel] = image_data
+
+    # Take last filepath an extract shape
+    image = im.imread(filepath)
+    images['height'] = image.shape[0]
+    images['width'] = image.shape[1]
 
     return images
 
@@ -61,12 +74,12 @@ def create_record(out_filename, data):
 
         feature = {
             'id' : _bytes_feature(bytes(img_id, 'utf-8')),
-            'height' : _int64_feature(images['green'].shape[0]),
-            'width' : _int64_feature(images['green'].shape[1]),
-            'image_green' : _bytes_feature(images['green'].tostring()),
-            'image_red' : _bytes_feature(images['red'].tostring()),
-            'image_blue' : _bytes_feature(images['blue'].tostring()),
-            'image_yellow' : _bytes_feature(images['yellow'].tostring()),
+            'height' : _int64_feature(images['height']),
+            'width' : _int64_feature(images['width']),
+            'image_green' : _bytes_feature(images['green']),
+            'image_red' : _bytes_feature(images['red']),
+            'image_blue' : _bytes_feature(images['blue']),
+            'image_yellow' : _bytes_feature(images['yellow']),
             'labels' : _int64_feature(label)
         }
 
@@ -92,13 +105,13 @@ def main():
     test_data = data[int(0.85*N):]
 
     print("Writing Train Records")
-    create_record(f'{KAGGLE_TRAIN}/tfrecords/train.tfrecords', train_data)
+    create_record(f'{KAGGLE_TRAIN}/tfrecords/train_g.tfrecords', train_data)
 
     print("Writing Validation Records")
-    create_record(f'{KAGGLE_TRAIN}/tfrecords/val.tfrecords', val_data)
+    create_record(f'{KAGGLE_TRAIN}/tfrecords/val_g.tfrecords', val_data)
 
     print("Writing Test Records")
-    create_record(f'{KAGGLE_TRAIN}/tfrecords/test.tfrecords', test_data)
+    create_record(f'{KAGGLE_TRAIN}/tfrecords/test_g.tfrecords', test_data)
 
 if __name__ == '__main__':
     main()

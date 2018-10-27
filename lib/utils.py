@@ -1,8 +1,15 @@
 from .config import *
 import tensorflow as tf
+from sklearn.metrics import f1_score
 
-def _decode_img(serialized_img, height=512, width=512):
-    image = tf.decode_raw(serialized_img, tf.float32)
+def f1_macro(y_true, y_pred):
+    return f1_score(y_true, y_pred, average='macro')
+
+def tf_f1_macro():
+    return tf.py_func(f1_macro)
+
+def _decode_img(img, height=512, width=512):
+    image = tf.image.decode_image(img, dtype=tf.float32)
     image = tf.reshape(image, (512, 512))
     
     return image
@@ -31,7 +38,7 @@ def _parse_function(example_proto):
     parsed = tf.parse_single_example(example_proto, features)
     
     # Reconstruct the Images
-    channels = ['green', 'red', 'blue', 'yellow']
+    channels = ['red', 'green', 'blue', 'yellow']
     h = features['height']
     w = features['width']
     
@@ -39,6 +46,7 @@ def _parse_function(example_proto):
                 parsed[f'image_{color}'], height=h, width=w) 
             for color in channels], axis=2)
     
+    # Convert labels to dense tensor (necessary?)
     labels = parsed['labels']
     labels = tf.sparse_to_dense(labels.indices, labels.dense_shape, labels.values)
     
@@ -60,5 +68,7 @@ def load_validation(**kwargs):
 def load_test(**kwargs):
     path = f'{KAGGLE_TRAIN}/tfrecords/test.tfrecords'
     return _load_dataset(path, **kwargs)
+
+#def build_and_train_estimator(keras_model, input_fn, val_input_fn=None, )
 
 
