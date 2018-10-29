@@ -6,7 +6,6 @@ TRAIN = f'{KAGGLE_TRAIN}/train'
 TEST = f'{KAGGLE_TRAIN}/test'
 VALIDATION = f'{KAGGLE_TRAIN}/validation'
 
-estimator_config = {
-    
-}
+# Relevant Dataset Info
+NUM_CLASSES = 28
 

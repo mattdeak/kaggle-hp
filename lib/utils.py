@@ -2,12 +2,6 @@ from .config import *
 import tensorflow as tf
 from sklearn.metrics import f1_score
 
-def f1_macro(y_true, y_pred):
-    return f1_score(y_true, y_pred, average='macro')
-
-def tf_f1_macro():
-    return tf.py_func(f1_macro)
-
 def _decode_img(img, height=512, width=512):
     image = tf.image.decode_image(img, dtype=tf.float32)
     image = tf.reshape(image, (512, 512))
