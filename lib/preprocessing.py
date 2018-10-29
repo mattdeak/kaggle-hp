@@ -52,10 +52,10 @@ class DropChannel(PreprocessingFunction):
 
 class RandomAugmentation(PreprocessingFunction):
 
-    def __init__(self, vertical_flip=True, horizontal_flip=True, contrast_maxdelta=None, brightness_maxdelta=None):
+    def __init__(self, vertical_flip=True, horizontal_flip=True, contrast_deltas=None, brightness_maxdelta=None):
         self.vertical = vertical_flip
         self.horizontal = horizontal_flip
-        self.contrast_delta = contrast_maxdelta
+        self.contrast_deltas = contrast_deltas
         self.brightness_delta = brightness_maxdelta
 
     def __call__(self, image, labels):
@@ -69,8 +69,8 @@ class RandomAugmentation(PreprocessingFunction):
             image = tf.image.random_brightness(image, self.brightness_delta)
             image = tf.clip_by_value(image, 0.0, 1.0) # In case brightness scaling goes too high or low
 
-        if self.contrast_delta:
-            image = tf.image.random_contrast(image, 0, self.contrast_delta)
+        if self.contrast_deltas:
+            image = tf.image.random_contrast(image, self.contrast_deltas[0], self.contrast_deltas[1])
             image = tf.clip_by_value(image, 0.0, 1.0) 
 
         return image, labels
