@@ -38,3 +38,40 @@ class FloatifyImage(PreprocessingFunction):
         """Converts an image from 0-255 int to 0-1 float format."""
         return image / 255, labels
 
+class DropChannel(PreprocessingFunction):
+
+    CHANNELS = ['red', 'green', 'blue', 'yellow']
+    def __init__(self, channel):
+        assert channel in self.CHANNELS, f"Channel {channel} not supported. Must be one of {self.CHANNELS}"
+        
+        self.channel = self.CHANNELS.index(channel)
+
+    def __call__(self, image, labels):
+        """Drops a color channel from an image"""
+        #TODO:Implement
+
+class RandomAugmentation(PreprocessingFunction):
+
+    def __init__(self, vertical_flip=True, horizontal_flip=True, contrast_maxdelta=None, brightness_maxdelta=None):
+        self.vertical = vertical_flip
+        self.horizontal = horizontal_flip
+        self.contrast_delta = contrast_maxdelta
+        self.brightness_delta = brightness_maxdelta
+
+    def __call__(self, image, labels):
+        if self.vertical:
+            image = tf.image.random_flip_up_down(image)
+        
+        if self.horizontal:
+            image = tf.image.random_flip_left_right(image)
+
+        if self.brightness_delta:
+            image = tf.image.random_brightness(image, self.brightness_delta)
+            image = tf.clip_by_value(image, 0.0, 1.0) # In case brightness scaling goes too high or low
+
+        if self.contrast_delta:
+            image = tf.image.random_contrast(image, 0, self.contrast_delta)
+            image = tf.clip_by_value(image, 0.0, 1.0) 
+
+        return image, labels
+
