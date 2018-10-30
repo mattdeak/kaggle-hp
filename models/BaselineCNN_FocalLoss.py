@@ -12,6 +12,8 @@ from tensorflow.keras.layers import Input, Dense, Activation, Conv2D, Flatten
 from tensorflow.keras.layers import MaxPooling2D, Dropout
 
 
+IMAGE_SIZE = (264, 264)
+
 def build_model():
     """Builds the testModel1 Architecture.
     """
