@@ -5,7 +5,7 @@ from tensorflow.keras.layers import MaxPool2D, Dense
 from .utils.blocks import inceptionV1_module
 from .utils.metrics import f1_macro
 
-IMAGE_SIZE = (256, 256)
+IMAGE_SHAPE = (256, 256)
 
 def _build_stemV1(model, channels=64):
     stem = Conv2D(channels, (7, 7), activation='relu')(model)
