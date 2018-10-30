@@ -1,8 +1,9 @@
 import tensorflow as tf
+import tensorflow.keras as keras
 from tensorflow.keras.layers import Input, Conv2D, GlobalAveragePooling2D, BatchNormalization
 from tensorflow.keras.layers import MaxPool2D, Dense
-from tensorflow.optimizers import 
 from .utils.blocks import inceptionV1_module
+from .utils.metrics import f1_macro
 
 def _build_stemV1(model, channels=64):
     stem = Conv2D(channels, (7, 7), activation='relu')(model)
@@ -18,8 +19,15 @@ def build_model(input_shape=(256, 256, 4)):
         model = inceptionV1_module(model)
 
     model = GlobalAveragePooling2D()(model)
-    model = Dense(28, activation='sigmoid')(model)
+    outputs = Dense(28, activation='sigmoid')(model)
 
-    optimizer = tf.train.AdamOptimizer(lr=0.001)
+    optimizer = tf.train.AdamOptimizer(0.001)
+
+    model = keras.Model(inputs=input_layer, outputs=outputs)
+
+    model.compile(optimizer=optimizer,
+                loss='binary_crossentropy',
+                metrics=[f1_macro, 'accuracy'])
+
     return model
     
