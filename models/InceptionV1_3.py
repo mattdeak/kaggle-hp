@@ -11,8 +11,8 @@ IMAGE_SHAPE = (256, 256)
 def _build_stemV1(model, channels=64):
 
     stem = Conv2D(channels, (7, 7), activation='relu', kernel_regularizer=l2(1e-4))(model)
-    stem = BatchNormalization()(model)
-    stem = MaxPool2D((2, 2))(model)
+    stem = BatchNormalization()(stem)
+    stem = MaxPool2D((2, 2))(stem)
     return stem
 
 def build_model(input_shape=(256, 256, 4)):
