@@ -10,12 +10,10 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Activation, Conv2D, Flatten
 from tensorflow.keras.layers import MaxPooling2D, Dropout
 
-IMAGE_SHAPE = (264, 264)
-
-def build_model():
+def build_model(input_shape=(264, 264, 4)):
     """Builds the testModel1 Architecture.
     """
-    inputs = Input(shape=(264, 264, 4))
+    inputs = Input(shape=input_shape)
     x = Conv2D(64, (3, 3), activation=tf.nn.relu)(inputs)
     x = MaxPooling2D((2, 2))(x)
 
@@ -40,26 +38,3 @@ def build_model():
                 metrics=[f1_macro])
     
     return model
-
-
-
-def run(train_input_fn, val_input_fn=None, steps=None, max_steps=None):
-    model = build_model()
-
-    estimator = keras.estimator.model_to_estimator(keras_model=model)
-
-    if val_input_fn:
-        train_spec = tf.estimator.TrainSpec(
-            input_fn=train_input_fn
-        )
-        eval_spec = tf.estimator.EvalSpec(
-            input_fn =val_input_fn
-        )
-
-        tf.estimator.train_and_evaluate(
-            estimator, 
-            train_spec,
-            eval_spec)
-    
-    else:
-        estimator.train(input_fn= train_input_fn)

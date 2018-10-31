@@ -40,7 +40,6 @@ class FloatifyImage(PreprocessingFunction):
 
 class DropChannel(PreprocessingFunction):
 
-    CHANNELS = ['red', 'green', 'blue', 'yellow']
     def __init__(self, channel):
         assert channel in self.CHANNELS, f"Channel {channel} not supported. Must be one of {self.CHANNELS}"
         
@@ -74,4 +73,15 @@ class RandomAugmentation(PreprocessingFunction):
             image = tf.clip_by_value(image, 0.0, 1.0) 
 
         return image, labels
+
+class RandomCrop(PreprocessingFunction):
+
+    def __init__(self, size=(224, 224), channels=4):
+
+        self.size = (size[0], size[1], channels)
+
+    def __call__(self, image, labels):
+
+        cropped = tf.random_crop(image, self.size)
+        return cropped, labels
 

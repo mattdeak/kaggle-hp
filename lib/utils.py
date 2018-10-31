@@ -1,4 +1,6 @@
 from .config import *
+import matplotlib.image as im
+import numpy as np
 import tensorflow as tf
 from sklearn.metrics import f1_score
 
@@ -63,6 +65,23 @@ def load_test(**kwargs):
     path = f'{KAGGLE_TRAIN}/tfrecords/test.tfrecords'
     return _load_dataset(path, **kwargs)
 
-#def build_and_train_estimator(keras_model, input_fn, val_input_fn=None, )
+# Data Exploration Utilities
+def load_image(image_id, directory=RAW, channels=['red' ,'green', 'blue']):
+    """Loads image channels from an image ID
+    
+    Arguments:
+        image_id {str} -- The ID of the image
+    
+    Keyword Arguments:
+        channels {list} -- A list of colour channels to include (default: {['green', 'blue', 'red', 'yellow']})
+    
+    Returns:
+        dict -- A dictionary in the form of {channel : image_info}
+    """
+
+    # Take last filepath an extract shape
+    image = np.stack([im.imread(f'{directory}/{image_id}_{channel}.png') for channel in channels], axis=2)
+    return image
+    
 
 
