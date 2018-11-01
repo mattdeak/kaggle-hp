@@ -1,10 +1,15 @@
-import tensorflow as tf
 import tensorflow.keras as keras
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.layers import Input, Conv2D, GlobalAveragePooling2D, BatchNormalization
-from tensorflow.keras.layers import MaxPool2D, Dense, Flatten
-from .utils.blocks import inceptionV1_module
+import tensorflow as tf
+
 from .utils.metrics import f1_macro, make_class_specific_f1
+from lib.config import NUM_CLASSES
+
+from lib.preprocessing import OneHotLabels, ResizeImage, FloatifyImage
+from lib.utils import load_train, load_validation
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense, Activation, Conv2D, Flatten
+from tensorflow.keras.layers import MaxPooling2D, Dropout
 
 def build_model(input_shape=(264, 264, 4), per_class_f1=True):
     """Builds the testModel1 Architecture.
@@ -40,4 +45,3 @@ def build_model(input_shape=(264, 264, 4), per_class_f1=True):
                 metrics=metrics)
     
     return model
-    
