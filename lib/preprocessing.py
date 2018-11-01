@@ -74,14 +74,51 @@ class RandomAugmentation(PreprocessingFunction):
 
         return image, labels
 
-class RandomCrop(PreprocessingFunction):
-
-    def __init__(self, size=(224, 224), channels=4):
-
-        self.size = (size[0], size[1], channels)
-
+class Maybe(PreprocessingFunction):
+    
+    def __init__(self, preprocessor, chance=0.5):
+        """A preprecessing super-layer that gives another preprocessor a
+        predefined chance of actually being executed.
+        
+        Arguments:
+            preprocessor {PreprocessingFunction} -- The preprocessor
+        
+        Keyword Arguments:
+            chance {float} -- The chance of a preprocessor being executed (default: {0.5})
+        """
+        assert isinstance(preprocessor, PreprocessingFunction), "Preprocessor must be a Preprocessing Function"
+        assert chance < 1.0 and chance > 0.0, "Chance should be between 0 and 1 exclusive"
+        self.preprocessor = preprocessor
+        self.chance = chance
+    
+        
     def __call__(self, image, labels):
-
-        cropped = tf.random_crop(image, self.size)
+        r = tf.random_uniform([1])[0]
+        
+        cond = tf.cond(
+            r < self.chance,
+            true_fn=lambda: self.preprocessor(image, labels),
+            false_fn=lambda: (image, labels))
+        return cond
+        
+class RandomCrop(PreprocessingFunction):
+    
+    def __init__(self, input_shape=(512, 512, 4), min_crop_pct=0.05, max_crop_pct=0.4):
+        """Randomly crops an image input. 
+        
+        Keyword Arguments:
+            input_shape {tuple} -- Expected shape of the incoming images (default: {(512, 512, 4)})
+            min_crop_pct {float} -- The minimum crop percentage. A larger value means the resulting crops will be smaller in size. (default: {0.05})
+            max_crop_pct {float} -- [description] The maximum crop percentage.  (default: {0.4})
+        """
+        self.input_shape = input_shape
+        self.min_crop = min_crop_pct
+        self.max_crop = max_crop_pct
+        
+    def __call__(self, image, labels):
+        crop_pct = tf.random_uniform([1], minval=self.min_crop, maxval=self.max_crop)[0]
+        cropped_size = tf.cast(self.input_shape[0] * (1 - crop_pct), tf.int32)
+        cropped = tf.random_crop(image, (cropped_size, cropped_size, self.input_shape[-1]))
         return cropped, labels
+
 
