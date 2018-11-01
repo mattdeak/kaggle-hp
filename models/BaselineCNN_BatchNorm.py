@@ -1,7 +1,7 @@
 import tensorflow.keras as keras
 import tensorflow as tf
 
-from .utils.metrics import f1_macro
+from .utils.metrics import f1_macro, make_class_specific_f1
 
 from lib.preprocessing import OneHotLabels, ResizeImage, FloatifyImage
 from lib.utils import load_train, load_validation
@@ -10,7 +10,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Activation, Conv2D, Flatten
 from tensorflow.keras.layers import MaxPooling2D, Dropout, BatchNormalization
 
-def build_model(input_shape=(224, 224, 4)):
+def build_model(input_shape=(224, 224, 4), per_class_f1=True):
     """Builds the testModel1 Architecture.
     """
     inputs = Input(shape=input_shape)
@@ -35,8 +35,14 @@ def build_model(input_shape=(224, 224, 4)):
 
     optimizer = tf.train.AdamOptimizer(0.001)
 
+    metrics = [f1_macro]
+
+    if per_class_f1:
+        all_metrics = [make_class_specific_f1(i) for i in range(NUM_CLASSES)]
+        metrics = metrics + all_metrics
+
     model.compile(optimizer=optimizer,
                 loss='binary_crossentropy',
-                metrics=[f1_macro])
+                metrics=metrics)
     
     return model

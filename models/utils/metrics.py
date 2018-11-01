@@ -1,7 +1,14 @@
 import tensorflow as tf 
 import tensorflow.keras.backend as K
+from lib.config import NUM_CLASSES
 
-def f1_macro(y_true, y_pred):
+def rename(newname):
+    def decorator(f):
+        f.__name__ = newname
+        return f
+    return decorator
+
+def _f1_macro_vector(y_true, y_pred):
     """Computes the F1-score with Macro averaging.
     
     Arguments:
@@ -29,6 +36,37 @@ def f1_macro(y_true, y_pred):
     
     # Convert NaN to Zero
     f1 = tf.where(tf.is_nan(f1), tf.zeros_like(f1), f1)
-    f1 = K.mean(f1)
-    
+
     return f1
+
+
+def f1_macro(y_true, y_pred):
+    """Computes the F1-score with Macro averaging.
+    
+    Arguments:
+        y_true {tf.Tensor} -- Ground-truth labels
+        y_pred {tf.Tensor} -- Predicted labels
+    
+    Returns:
+        tf.Tensor -- The computed F1-Score
+    """
+    f1 = _f1_macro_vector(y_true, y_pred)
+    
+    # tf.merge(precision_summaries)
+    # tf.merge(recall_summaries)
+        
+#     tf.summary.scalar('Class_Precisions', prec)
+#     tf.summary.scalar('Class_Recalls', rec)
+
+    f1_mean = K.mean(f1)
+    
+    return f1_mean
+
+def make_class_specific_f1(label_number):
+
+    @rename(f'Class{label_number}_F1-Macro')
+    def label_f1_macro(y_true, y_pred):
+        f1 = _f1_macro_vector(y_true, y_pred)
+        return f1[label_number]
+
+    return label_f1_macro

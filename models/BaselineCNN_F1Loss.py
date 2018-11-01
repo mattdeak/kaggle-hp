@@ -9,12 +9,11 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Activation, Conv2D, Flatten
 from tensorflow.keras.layers import MaxPooling2D, Dropout
 
-IMAGE_SHAPE = (264, 264)
 
-def build_model():
+def build_model(input_shape=(264, 264, 4), per_class_f1=True)):
     """Builds the testModel1 Architecture.
     """
-    inputs = Input(shape=(264, 264, 4))
+    inputs = Input(shape=input_shape)
     x = Conv2D(64, (3, 3), activation=tf.nn.relu)(inputs)
     x = MaxPooling2D((2, 2))(x)
 
@@ -34,8 +33,14 @@ def build_model():
 
     optimizer = tf.train.AdamOptimizer(0.001)
 
+    metrics = [f1_macro]
+
+    if per_class_f1:
+        all_metrics = [make_class_specific_f1(i) for i in range(NUM_CLASSES)]
+        metrics = metrics + all_metrics
+
     model.compile(optimizer=optimizer,
                 loss=f1_loss,
-                metrics=[f1_macro])
+                metrics=metrics)
     
     return model
