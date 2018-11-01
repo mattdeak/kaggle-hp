@@ -1,8 +1,8 @@
 from lib.preprocessing import OneHotLabels, ResizeImage, FloatifyImage
 from lib.utils import load_train, load_validation
 from .utils.losses import f1_loss
-from .utils.metrics import f1_macro
-
+from .utils.metrics import f1_macro, make_class_specific_f1
+from lib.config import NUM_CLASSES
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.models import Model

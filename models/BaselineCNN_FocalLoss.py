@@ -6,6 +6,7 @@ from .utils.losses import focal_loss
 
 from lib.preprocessing import OneHotLabels, ResizeImage, FloatifyImage
 from lib.utils import load_train, load_validation
+from lib.config import NUM_CLASSES
 
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, Activation, Conv2D, Flatten

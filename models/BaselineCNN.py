@@ -2,6 +2,7 @@ import tensorflow.keras as keras
 import tensorflow as tf
 
 from .utils.metrics import f1_macro, make_class_specific_f1
+from lib.config import NUM_CLASSES
 
 from lib.preprocessing import OneHotLabels, ResizeImage, FloatifyImage
 from lib.utils import load_train, load_validation
