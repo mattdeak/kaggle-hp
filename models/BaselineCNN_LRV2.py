@@ -6,33 +6,38 @@ from tensorflow.keras.layers import MaxPool2D, Dense, Flatten
 from .utils.blocks import inceptionV1_module
 from .utils.metrics import f1_macro, make_class_specific_f1
 
-IMAGE_SHAPE = (256, 256)
+def build_model(input_shape=(264, 264, 4), per_class_f1=True):
+    """Builds the testModel1 Architecture.
+    """
+    inputs = Input(shape=input_shape)
+    x = Conv2D(64, (3, 3), activation=tf.nn.relu)(inputs)
+    x = MaxPooling2D((2, 2))(x)
 
-def _build_stemV1(model, channels=64):
+    for i in range(2):
+        x = Conv2D(64, (3, 3), activation=tf.nn.relu)(x)
+        x = MaxPooling2D((2, 2))(x)
 
-    stem = Conv2D(channels, (7, 7), activation='relu', kernel_regularizer=l2(1e-4))(model)
-    stem = BatchNormalization()(stem)
-    stem = MaxPool2D((2, 2))(stem)
-    return stem
+    x = Flatten()(x)
+    x = Dense(264, activation=tf.nn.relu)(x)
+    x = Dropout(.5)(x)
+    x = Dense(264, activation=tf.nn.relu)(x)
+    x = Dropout(.5)(x)
+    
+    outputs = Dense(28, activation=tf.nn.sigmoid)(x)
 
-def build_model(input_shape=(256, 256, 4), per_class_f1=True)):
-    input_layer = Input(shape=input_shape)
-
-    model = _build_stemV1(input_layer)
-    for i in range(3):
-        model = inceptionV1_module(model, regularizer=l2(1e-4))
-
-    model = GlobalAveragePooling2D()(model)
-    model = Flatten()(model)
-    outputs = Dense(28, activation='sigmoid', kernel_regularizer=l2(1e-4))(model)
+    model = keras.Model(inputs=inputs, outputs=outputs)
 
     optimizer = tf.train.AdamOptimizer(0.0001)
 
-    model = keras.Model(inputs=input_layer, outputs=outputs)
+    metrics = [f1_macro]
+
+    if per_class_f1:
+        all_metrics = [make_class_specific_f1(i) for i in range(NUM_CLASSES)]
+        metrics = metrics + all_metrics
 
     model.compile(optimizer=optimizer,
                 loss='binary_crossentropy',
-                metrics=[f1_macro, 'accuracy'])
-
+                metrics=metrics)
+    
     return model
     
