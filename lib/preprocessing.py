@@ -38,16 +38,6 @@ class FloatifyImage(PreprocessingFunction):
         """Converts an image from 0-255 int to 0-1 float format."""
         return image / 255, labels
 
-class DropChannel(PreprocessingFunction):
-
-    def __init__(self, channel):
-        assert channel in self.CHANNELS, f"Channel {channel} not supported. Must be one of {self.CHANNELS}"
-        
-        self.channel = self.CHANNELS.index(channel)
-
-    def __call__(self, image, labels):
-        """Drops a color channel from an image"""
-        #TODO:Implement
 
 class RandomAugmentation(PreprocessingFunction):
 
@@ -121,4 +111,22 @@ class RandomCrop(PreprocessingFunction):
         cropped = tf.random_crop(image, (cropped_size, cropped_size, self.input_shape[-1]))
         return cropped, labels
 
+class DropChannel(PreprocessingFunction):
+
+    channel_dict = {
+        'red' : 0,
+        'green' : 1,
+        'blue' : 2,
+        'yellow' : 3
+    }
+
+    channels = ['red', 'green', 'blue', 'yellow']
+    def __init__(self, drop_labels=[]):
+        self.keep_labels = [self.channel_dict[ch] for ch in self.channels if ch not in drop_labels]
+
+    def __call__(self, image, labels):
+        """Drop the corresponding labels from the tensor"""
+        modified = tf.stack([image[:, :, i] for i in self.keep_labels], axis=-1)
+        return modified, labels
+            
 
