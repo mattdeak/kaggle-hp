@@ -21,9 +21,9 @@ def _f1_macro_vector(y_true, y_pred):
     y_true = K.cast(y_true, tf.float64)
     y_pred = K.cast(y_pred, tf.float64)
     
-    TP = K.sum(y_true * K.round(y_pred), axis=0)
-    FN = K.sum(y_true * (1 - K.round(y_pred)), axis=0)
-    FP = K.sum((1 - y_true) * K.round(y_pred), axis=0)
+    TP = tf.reduce_sum(y_true * K.round(y_pred), axis=0, name='TP')
+    FN = tf.reduce_sum(y_true * (1 - K.round(y_pred)), axis=0, name='FN')
+    FP = tf.reduce_sum((1 - y_true) * K.round(y_pred), axis=0, name='FP')
     
     prec = TP / (TP + FP)
     rec = TP / (TP + FN)
